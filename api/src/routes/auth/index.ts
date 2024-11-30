@@ -13,9 +13,13 @@ import jwt from 'jsonwebtoken';
 const router = Router();
 
 const generateUserToken = (user: any) => {
-  return jwt.sign({ userId: user.id, role: user.role }, 'your-secret', {
-    expiresIn: '30d',
-  });
+  return jwt.sign(
+    { userId: user.id, role: user.role },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: '30d',
+    }
+  );
 };
 
 router.post('/register', validateData(createUserSchema), async (req, res) => {

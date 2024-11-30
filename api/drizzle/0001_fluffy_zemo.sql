@@ -3,7 +3,10 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"email" varchar(255) NOT NULL,
 	"password" varchar(255) NOT NULL,
 	"role" varchar(255) DEFAULT 'user' NOT NULL,
-	"name" varchar(255),
+	"name" varchar(255) NOT NULL,
 	"address" text,
+	"avatarUrl" varchar(255),
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );

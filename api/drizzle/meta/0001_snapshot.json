@@ -1,11 +1,11 @@
 {
-  "id": "d15bb666-6d5d-42a4-9f89-68744ac39413",
-  "prevId": "70f4ae37-e75a-46a8-874c-d75d0bbc2e9b",
+  "id": "ccdaecef-2833-41a1-a132-7cbd06f22fb8",
+  "prevId": "dc2f0a09-c215-4b7e-88dc-fb46c725f1b0",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.products": {
-      "name": "products",
+    "public.dolls": {
+      "name": "dolls",
       "schema": "",
       "columns": {
         "id": {
@@ -15,7 +15,7 @@
           "notNull": true,
           "identity": {
             "type": "always",
-            "name": "products_id_seq",
+            "name": "dolls_id_seq",
             "schema": "public",
             "increment": "1",
             "startWith": "1",
@@ -25,8 +25,8 @@
             "cycle": false
           }
         },
-        "name": {
-          "name": "name",
+        "dollName": {
+          "name": "dollName",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -35,19 +35,40 @@
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
+        },
+        "viewsCount": {
+          "name": "viewsCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
         },
         "image": {
           "name": "image",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "price": {
           "name": "price",
           "type": "double precision",
           "primaryKey": false,
           "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -99,13 +120,33 @@
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "address": {
           "name": "address",
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "avatarUrl": {
+          "name": "avatarUrl",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
