@@ -12,8 +12,12 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { fetchDoll } from '@/api/dolls';
 import { ActivityIndicator, SafeAreaView } from 'react-native';
+import { useCart } from '@/store/cartStore';
 const ProductDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
+
+  const addDoll = useCart((state: any) => state.addDoll);
+  const cartItems = useCart((state: any) => state.items);
 
   const {
     data: doll,
@@ -23,6 +27,10 @@ const ProductDetailsScreen = () => {
     queryKey: [`dolls`, id],
     queryFn: () => fetchDoll(Number(id)),
   });
+
+  const addToCart = () => {
+    addDoll(doll);
+  };
 
   if (isLoading) {
     return (
@@ -61,7 +69,10 @@ const ProductDetailsScreen = () => {
           <Text size='sm'>{doll.description}</Text>
         </VStack>
         <Box className='flex-col sm:flex-row'>
-          <Button className='px-4 py-2 mr-0 mb-3 sm:mr-3 sm:mb-0 sm:flex-1'>
+          <Button
+            onPress={addToCart}
+            className='px-4 py-2 mr-0 mb-3 sm:mr-3 sm:mb-0 sm:flex-1'
+          >
             <ButtonText size='sm'>Add to cart</ButtonText>
           </Button>
           <Button
