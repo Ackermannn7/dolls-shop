@@ -19,6 +19,11 @@ export const useAuth = create(
       token: null,
       setUser: (user: User) => set({ user }),
       setToken: (token: string) => set({ token }),
+      logout: () =>
+        set(() => ({
+          user: null,
+          token: null,
+        })),
     }),
     {
       name: 'auth-store',

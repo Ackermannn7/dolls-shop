@@ -1,3 +1,5 @@
+import { useAuth } from '@/store/authStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -32,4 +34,10 @@ export const signup = async (
     console.error('Registration error:', error);
     throw new Error(error.response?.data?.message || 'Registration failed');
   }
+};
+
+export const logout = async (logoutFn: () => void) => {
+  const logout = useAuth((s: any) => s.logout); // Получаем метод logout из Zustand
+  logoutFn(); // Очищаем глобальное состояние
+  await AsyncStorage.clear(); // Полностью очищаем AsyncStorage
 };
