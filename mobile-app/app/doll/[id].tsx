@@ -35,7 +35,7 @@ const ProductDetailsScreen = () => {
   if (isLoading) {
     return (
       <SafeAreaView className='w-full h-full flex items-center justify-center'>
-        <ActivityIndicator size='large' color='#1f1f1f' />
+        <ActivityIndicator size='small' color='#1f1f1f' />
       </SafeAreaView>
     );
   }

@@ -15,11 +15,7 @@ const EmptyCart = () => {
         {'\n'}
         To do this, please return to the main page.
       </Text>
-      <Image
-        className='max-w-[450px] aspect-square w-full'
-        source={emptyCartImg}
-        alt='Empty cart'
-      />
+      <Image className='w-36 h-36' source={emptyCartImg} alt='Empty cart' />
       <Link href='/' className='' asChild>
         <Button>
           <ButtonText>Back</ButtonText>
