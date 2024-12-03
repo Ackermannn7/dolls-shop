@@ -6,13 +6,34 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { useCart } from '@/store/cartStore';
 import EmptyCart from '@/components/EmptyCart';
 import { Image } from '@/components/ui/image';
+import { useMutation } from '@tanstack/react-query';
+import { createOrder } from '@/api/orders';
 
 export default function CartScreen() {
   const items = useCart((state: any) => state.items);
+  console.log(items);
+
   const resetCart = useCart((state: any) => state.resetCart);
 
+  const createOrderMutation = useMutation({
+    mutationFn: () =>
+      createOrder(
+        items.map((item: any) => ({
+          dollId: item.doll.id,
+          quantity: item.quantity,
+          price: item.doll.price * item.quantity,
+        }))
+      ),
+    onSuccess: (data) => {
+      console.log(data);
+      resetCart();
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
   const onCheckout = async () => {
-    resetCart();
+    createOrderMutation.mutate();
   };
 
   return items.length > 0 ? (

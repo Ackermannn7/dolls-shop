@@ -37,7 +37,6 @@ export const signup = async (
 };
 
 export const logout = async (logoutFn: () => void) => {
-  const logout = useAuth((s: any) => s.logout); // Получаем метод logout из Zustand
   logoutFn(); // Очищаем глобальное состояние
   await AsyncStorage.clear(); // Полностью очищаем AsyncStorage
 };

@@ -12,7 +12,7 @@ export async function createOrder(req: Request, res: Response) {
     const { order, items } = insertOrderWithItemsSchema.parse(req.cleanBody);
 
     const userId = req.userId;
-    console.log(userId);
+
     if (!userId) {
       res.status(400).json({ message: 'Invalid order data' });
     }
