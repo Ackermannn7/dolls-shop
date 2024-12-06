@@ -34,8 +34,6 @@ export async function getDollById(req: Request, res: Response) {
 
 export async function createDoll(req: Request, res: Response) {
   try {
-    console.log(req.userId);
-
     const [doll] = await db
       .insert(dollsTable)
       .values(req.cleanBody)

@@ -1,17 +1,22 @@
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
-import { FlatList } from 'react-native';
+import { FlatList, SafeAreaView, View } from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { useCart } from '@/store/cartStore';
 import EmptyCart from '@/components/EmptyCart';
 import { Image } from '@/components/ui/image';
 import { useMutation } from '@tanstack/react-query';
 import { createOrder } from '@/api/orders';
+import { Stack } from 'expo-router';
+import { Box } from '@/components/ui/box';
+import DarkMode from '@/utils/darkmode.context';
+import { useContext } from 'react';
 
 export default function CartScreen() {
+  const { isDarkMode } = useContext(DarkMode);
+
   const items = useCart((state: any) => state.items);
-  console.log(items);
 
   const resetCart = useCart((state: any) => state.resetCart);
 
@@ -24,8 +29,7 @@ export default function CartScreen() {
           price: item.doll.price * item.quantity,
         }))
       ),
-    onSuccess: (data) => {
-      console.log(data);
+    onSuccess: () => {
       resetCart();
     },
     onError: (error) => {
@@ -36,40 +40,75 @@ export default function CartScreen() {
     createOrderMutation.mutate();
   };
 
-  return items.length > 0 ? (
-    <FlatList
-      data={items}
-      contentContainerClassName='gap-2 max-w-[960px] w-full mx-auto'
-      renderItem={({ item }) => (
-        <HStack className='bg-white p-3 items-center justify-between'>
-          {/* Левая часть: Изображение и текст */}
-          <HStack className='gap-3 items-center'>
-            <Image
-              className='w-20 h-20 rounded-sm'
-              source={{
-                uri: item.doll.image,
-              }}
-              alt={item.doll.dollName}
-            />
-            <VStack className='justify-center'>
-              <Text className='text-xl' bold>
-                {item.doll.dollName}
-              </Text>
-              <Text className='text-lg'>$ {item.doll.price}</Text>
-            </VStack>
-          </HStack>
+  return (
+    <View
+      className={`w-full h-full ${isDarkMode ? 'bg-[#262626]' : 'bg-[#f1f5f9]'}`}
+    >
+      <Stack.Screen options={{ title: `Cart` }} />
+      {items.length > 0 ? (
+        <Box className='w-full flex'>
+          <FlatList
+            data={items}
+            contentContainerClassName={`gap-4 max-w-[960px] w-full mx-auto ${isDarkMode ? 'bg-black' : 'bg-white'}`}
+            renderItem={({ item, index }) => (
+              <Box>
+                <HStack
+                  className={`bg-white p-3 items-center justify-between ${isDarkMode ? 'bg-black' : 'bg-white'}`}
+                >
+                  <HStack className='gap-3 items-center'>
+                    <Text
+                      className={`text-lg ${isDarkMode ? 'text-[#f1f5f9]' : 'text-[#262626]'} `}
+                    >
+                      {index + 1}.
+                    </Text>
+                    <Image
+                      className='w-20 h-20 rounded-sm'
+                      source={{
+                        uri: item.doll.image,
+                      }}
+                      alt={item.doll.dollName}
+                    />
+                    <VStack className='justify-center'>
+                      <Text
+                        className={`text-xl ${isDarkMode ? 'text-[#f1f5f9]' : 'text-[#262626]'}`}
+                        bold
+                      >
+                        {item.doll.dollName}
+                      </Text>
+                      <Text
+                        className={`text-lg ${isDarkMode ? 'text-[#f1f5f9]' : 'text-[#262626]'}`}
+                      >
+                        $ {item.doll.price}
+                      </Text>
+                    </VStack>
+                  </HStack>
 
-          {/* Правая часть: Количество */}
-          <Text className='text-lg'>{item.quantity}</Text>
-        </HStack>
+                  {/* Правая часть: Количество */}
+                  <Text
+                    className={`text-lg ${isDarkMode ? 'text-[#f1f5f9]' : 'text-[#262626]'}`}
+                  >
+                    {item.quantity}
+                  </Text>
+                </HStack>
+                <View className='border-t border-[#7e7e7e]' />
+              </Box>
+            )}
+          />
+
+          <Button
+            className={`mt-10 flex self-center justify-center items-center max-w-32 w-full text-xl ${isDarkMode ? 'text-[#f1f5f9]' : 'text-[#262626]'} bg-green-500`}
+            onPress={onCheckout}
+          >
+            <ButtonText
+              className={`${isDarkMode ? 'text-[#f1f5f9]' : 'text-[#262626]'} `}
+            >
+              Checkout
+            </ButtonText>
+          </Button>
+        </Box>
+      ) : (
+        <EmptyCart />
       )}
-      ListFooterComponent={() => (
-        <Button onPress={onCheckout}>
-          <ButtonText>Checkout</ButtonText>
-        </Button>
-      )}
-    />
-  ) : (
-    <EmptyCart />
+    </View>
   );
 }

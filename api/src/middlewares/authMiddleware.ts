@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 
 export function verifyToken(req: Request, res: Response, next: NextFunction) {
   const token = req.header('Authorization');
-  console.log(token);
 
   if (!token) {
     res.status(401).json({ error: 'Access denied' });
