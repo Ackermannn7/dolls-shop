@@ -52,7 +52,7 @@ export async function createPaymentIntent(req: Request, res: Response) {
 
     const ephemeralKey = await stripe.ephemeralKeys.create(
       { customer: customer.id },
-      { apiVersion: '2024-09-30.acacia' }
+      { apiVersion: '2024-11-20.acacia' }
     );
 
     // TODO: calculate the amount dynamically
@@ -95,22 +95,22 @@ export async function webhook(req: Request, res: Response) {
 
   // Handle the event
   switch (event.type) {
-    case 'payment_intent.succeeded':
+    case 'payment_intent.succeeded': {
       const paymentIntent = event.data.object;
       await db
         .update(ordersTable)
-        .set({ status: 'Payed' })
-        // @ts-ignore
+        .set({ status: 'payed' })
         .where(eq(ordersTable.stripePaymentIntentId, paymentIntent.id));
       break;
-    case 'payment_intent.payment_failed':
+    }
+    case 'payment_intent.payment_failed': {
       const paymentIntentFailed = event.data.object;
       await db
         .update(ordersTable)
-        .set({ status: 'Payment Failed' })
-        // @ts-ignore
+        .set({ status: 'payment_failed' })
         .where(eq(ordersTable.stripePaymentIntentId, paymentIntentFailed.id));
       break;
+    }
     case 'payment_method.attached':
       const paymentMethod = event.data.object;
       // Then define and call a method to handle the successful attachment of a PaymentMethod.
