@@ -1,24 +1,46 @@
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
-import { FlatList, SafeAreaView, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  SafeAreaView,
+  View,
+} from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { useCart } from '@/store/cartStore';
 import EmptyCart from '@/components/EmptyCart';
 import { Image } from '@/components/ui/image';
 import { useMutation } from '@tanstack/react-query';
 import { createOrder } from '@/api/orders';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { Box } from '@/components/ui/box';
 import DarkMode from '@/utils/darkmode.context';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { createPaymentIntent } from '@/api/stripe';
+import { useStripe } from '@stripe/stripe-react-native';
 
 export default function CartScreen() {
+  const router = useRouter();
   const { isDarkMode } = useContext(DarkMode);
-
   const items = useCart((state: any) => state.items);
-
   const resetCart = useCart((state: any) => state.resetCart);
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const [loading, setLoading] = useState(false); // ✅ Убедитесь, что loading обновляется корректно
+  console.log(loading);
+
+  const onCheckout = async () => {
+    setLoading(true); // ✅ Установите состояние загрузки
+    try {
+      await createOrderMutation.mutateAsync();
+    } catch (error) {
+      console.error('Checkout Error:', error);
+      Alert.alert('Error', 'Unable to complete the checkout process');
+    } finally {
+      setLoading(false); // ✅ Отключаем загрузку после завершения
+    }
+  };
 
   const createOrderMutation = useMutation({
     mutationFn: () =>
@@ -26,18 +48,56 @@ export default function CartScreen() {
         items.map((item: any) => ({
           dollId: item.doll.id,
           quantity: item.quantity,
-          price: item.doll.price * item.quantity,
+          price: item.doll.price,
         }))
       ),
-    onSuccess: () => {
-      resetCart();
+    onSuccess: (data) => {
+      paymentIntentMutation.mutate({ orderId: data.id });
     },
     onError: (error) => {
       console.log(error);
+      Alert.alert('Error', 'The order was not created!');
+      setLoading(false); // ✅ Обновляем состояние загрузки
     },
   });
-  const onCheckout = async () => {
-    createOrderMutation.mutate();
+
+  const paymentIntentMutation = useMutation({
+    mutationFn: createPaymentIntent,
+    onSuccess: async (data) => {
+      const { customer, ephemeralKey, paymentIntent } = data;
+
+      const { error } = await initPaymentSheet({
+        merchantDisplayName: 'Dolls for all',
+        customerId: customer,
+        customerEphemeralKeySecret: ephemeralKey,
+        paymentIntentClientSecret: paymentIntent,
+      });
+      if (error) {
+        console.log('Init Payment Sheet Error:', error);
+        Alert.alert('Error', error.message);
+        setLoading(false); // ✅ Устанавливаем loading в false
+        return;
+      }
+      await openPaymentSheet();
+    },
+    onError: (error) => {
+      console.log(error);
+      setLoading(false); // ✅ Устанавливаем loading в false
+      Alert.alert('Error', 'Unable to create Payment Intent');
+    },
+  });
+
+  const openPaymentSheet = async () => {
+    const { error } = await presentPaymentSheet();
+    if (error) {
+      console.log('Payment Sheet Error:', error);
+      Alert.alert('Error', 'Payment is not completed!');
+    } else {
+      Alert.alert('Success', 'Your order is confirmed!');
+      resetCart();
+      router.replace('/');
+    }
+    setLoading(false); // ✅ Устанавливаем loading в false
   };
 
   return (
@@ -63,9 +123,7 @@ export default function CartScreen() {
                     </Text>
                     <Image
                       className='w-20 h-20 rounded-sm'
-                      source={{
-                        uri: item.doll.image,
-                      }}
+                      source={{ uri: item.doll.image }}
                       alt={item.doll.dollName}
                     />
                     <VStack className='justify-center'>
@@ -83,7 +141,6 @@ export default function CartScreen() {
                     </VStack>
                   </HStack>
 
-                  {/* Правая часть: Количество */}
                   <Text
                     className={`text-lg ${isDarkMode ? 'text-[#f1f5f9]' : 'text-[#262626]'}`}
                   >
@@ -96,14 +153,22 @@ export default function CartScreen() {
           />
 
           <Button
-            className={`mt-10 flex self-center justify-center items-center max-w-32 w-full text-xl ${isDarkMode ? 'text-[#f1f5f9]' : 'text-[#262626]'} bg-green-500`}
+            className={`mt-10 flex self-center justify-center items-center max-w-32 w-full text-xl  ${loading ? 'bg-slate-400' : 'bg-green-500'}`}
             onPress={onCheckout}
+            disabled={loading} // ✅ Устанавливаем состояние disabled
           >
-            <ButtonText
-              className={`${isDarkMode ? 'text-[#f1f5f9]' : 'text-[#262626]'} `}
-            >
-              Checkout
-            </ButtonText>
+            {loading ? (
+              <ActivityIndicator
+                size='small'
+                color={isDarkMode ? '#f1f5f9' : '#262626'}
+              />
+            ) : (
+              <ButtonText
+                className={`${isDarkMode ? 'text-[#f1f5f9]' : 'text-[#262626]'}`}
+              >
+                Checkout
+              </ButtonText>
+            )}
           </Button>
         </Box>
       ) : (

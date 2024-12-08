@@ -1,11 +1,12 @@
 import express, { json, urlencoded, Request } from 'express';
 // @ts-ignore
+
 import cors from 'cors'; // Импортируем cors
 import dollsRoutes from './routes/dolls/index.js';
 import authRoutes from './routes/auth/index.js';
 import ordersRoutes from './routes/orders/index.js';
 import serverless from 'serverless-http';
-
+import stripeRoutes from './routes/stripe/index.js';
 const port = 3001;
 const app = express();
 
@@ -37,6 +38,7 @@ app.get('/', (req, res) => {
 app.use('/dolls', dollsRoutes);
 app.use('/auth', authRoutes);
 app.use('/orders', ordersRoutes);
+app.use('/stripe', stripeRoutes);
 
 if (process.env.NODE_ENV === 'dev') {
   app.listen(port, () => {
