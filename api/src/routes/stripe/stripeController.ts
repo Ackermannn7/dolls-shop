@@ -7,6 +7,7 @@ import { usersTable } from '../..//db/usersSchema.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET!;
+console.log(endpointSecret);
 
 export async function getKeys(req: Request, res: Response) {
   res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
@@ -83,11 +84,13 @@ export async function createPaymentIntent(req: Request, res: Response) {
 
 export async function webhook(req: Request, res: Response) {
   const sig = req.headers['stripe-signature'];
+  console.log(sig);
 
   let event;
 
   try {
     event = stripe.webhooks.constructEvent(req.rawBody!, sig!, endpointSecret);
+    console.log(event);
   } catch (err) {
     res.status(400).send(`Webhook Error: ${(err as Error).message}`);
     return;
@@ -95,22 +98,20 @@ export async function webhook(req: Request, res: Response) {
 
   // Handle the event
   switch (event.type) {
-    case 'payment_intent.succeeded': {
+    case 'payment_intent.succeeded':
       const paymentIntent = event.data.object;
       await db
         .update(ordersTable)
         .set({ status: 'payed' })
         .where(eq(ordersTable.stripePaymentIntentId, paymentIntent.id));
       break;
-    }
-    case 'payment_intent.payment_failed': {
+    case 'payment_intent.payment_failed':
       const paymentIntentFailed = event.data.object;
       await db
         .update(ordersTable)
         .set({ status: 'payment_failed' })
         .where(eq(ordersTable.stripePaymentIntentId, paymentIntentFailed.id));
       break;
-    }
     case 'payment_method.attached':
       const paymentMethod = event.data.object;
       // Then define and call a method to handle the successful attachment of a PaymentMethod.

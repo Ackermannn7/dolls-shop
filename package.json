@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "express": "^4.21.2",
+    "raw-body": "^3.0.0",
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/raw-body": "^2.3.0"
+  }
+}
